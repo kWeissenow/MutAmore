@@ -59,12 +59,11 @@ def render_3d_frames(id, seq, pdb_dir, png_dir, width, height):
     wt_file = os.path.join(pdb_dir, "{}.pdb".format(id))
     pymol.cmd.load(wt_file, "wt")
 
-    aa_list = list("ACDEFGHIKLMNPQRSTVWY")
     total = len(seq) * 19
     printProgressBar(0, total, prefix = 'Rendering 3D structures:', suffix = 'Complete', length = 50)
     counter = 0
     for i in range(len(seq)):
-        for aa in aa_list:
+        for aa in list("ACDEFGHIKLMNPQRSTVWY"):
             if aa == seq[i]:
                 continue
             temp_seq = seq.copy()
@@ -76,6 +75,8 @@ def render_3d_frames(id, seq, pdb_dir, png_dir, width, height):
             
             counter += 1
             printProgressBar(counter, total, prefix = 'Rendering 3D structures:', suffix = 'Complete', length = 50)
+            
+    pymol.cmd.reinitialize()
             
     end_time = time.time()
     print("Elapsed time: {}".format(end_time - start_time))

@@ -1,7 +1,5 @@
 from Bio.PDB import *
-from Bio import SeqIO
 import numpy as np
-import sys
 import os
 import time
 from scipy.spatial.distance import cdist
@@ -86,18 +84,14 @@ def gradient_color(minval, maxval, val, color_palette=((0,0,0), (255,0,0), (255,
     return int(r1 + f*(r2-r1)), int(g1 + f*(g2-g1)), int(b1 + f*(b2-b1))
     
     
-def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir):
+def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width, margin_horiz, margin_vert, ticks=10):
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
 
     start_time = time.time()
 
-    width = 250
-    margin_horiz = 25
-    margin_vert = 20
     length = len(seq)
     
-    ticks = 10
     font_size = 12
     font = ImageFont.truetype("font.ttf", font_size)
     
@@ -223,7 +217,7 @@ def draw_amino_acid_labels():
     return im
     
 
-def render_mutation_matrices(id, seq, height, pdb_dir, out_dir):
+def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margin_horiz=25, margin_vert=20):
     # draw legend
     legend = draw_legend()
     
@@ -231,22 +225,4 @@ def render_mutation_matrices(id, seq, height, pdb_dir, out_dir):
     aa_labels = draw_amino_acid_labels()
 
     mut_matrix = get_mutation_matrix(id, seq, pdb_dir)
-    render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir)
-
-
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: {} <fasta_file>".format(sys.argv[0]))
-        quit()
-    fasta_file = sys.argv[1]
-    
-    record = list(SeqIO.parse(fasta_file, "fasta"))[0]
-    seq = list(record.seq)
-    id = record.id
-    
-    render_mutation_matrices(id, seq, 720, "./pdb", "./mut_matrices_png/")
-    
-
-if __name__ == "__main__":
-    main()
-
+    render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width=width, margin_horiz=margin_horiz, margin_vert=margin_vert)
