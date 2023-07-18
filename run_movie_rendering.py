@@ -2,6 +2,7 @@ import argparse
 import os
 import time
 import shutil
+import stat
 from utils import *
 
 
@@ -10,15 +11,15 @@ def main():
                     prog='MutaMoRe',
                     description='Rendering protein mutation movies from predicted 3D structures')
 
-    parser.add_argument('-i', '--input_fasta', type=str, description="Input FASTA file", required=True)
-    parser.add_argument('-o', '--output_dir', type=str, description="Output directory for movies (default: current working directory)", default="./")
-    parser.add_argument('-w', '--width', type=int, description="Movie horizontal resolution (default: 1280)", default=1280)
-    parser.add_argument('-h', '--height', type=int, description="Movie vertical resolution (default: 720)", default=720)
-    parser.add_argument('-t', '--temp_dir', type=str, description="Directory for temporary files (default: ./tmp)", default="./tmp")
-    parser.add_argument('-p', '--prediction_dir', type=str, description="Directory for predicted structures (default: ./tmp/predictions)", default="./tmp/predictions")
-    parser.add_argument('-s', '--predictor_script', type=str, dest="template_script", description="Structure prediction script")
-    parser.add_argument('--only-predict', dest="only_predict", action="store_true")
-    parser.add_argument('--only-render', dest="only_render", action="store_true")
+    parser.add_argument('-i', '--input_fasta', type=str, help="Input FASTA file", required=True)
+    parser.add_argument('-o', '--output_dir', type=str, help="Output directory for movies (default: current working directory)", default="./")
+    parser.add_argument('--width', type=int, help="Movie horizontal resolution (default: 1280)", default=1280)
+    parser.add_argument('--height', type=int, help="Movie vertical resolution (default: 720)", default=720)
+    parser.add_argument('-t', '--temp_dir', type=str, help="Directory for temporary files (default: ./tmp)", default="./tmp")
+    parser.add_argument('-p', '--prediction_dir', type=str, help="Directory for predicted structures (default: ./tmp/predictions)", default="./tmp/predictions")
+    parser.add_argument('-s', '--predictor_script', type=str, dest="template_script", help="Structure prediction script")
+    parser.add_argument('--only-predict', dest="only_predict", action="store_true", help="Only run structure prediction")
+    parser.add_argument('--only-render', dest="only_render", action="store_true", help="Only run movie rendering")
     args = parser.parse_args()
 
     input_fasta = args.input_fasta
@@ -77,11 +78,15 @@ def main():
 
         # Prepare predictor script
         predictor_script = os.path.join(tmp_dir, "predictor.sh")
-        prepare_predictor_script(args.template_script, predictor_script, input_fasta, prediction_dir)
+        prepare_predictor_script(args.template_script, predictor_script, mutated_fasta, prediction_dir)
+
+        # Make script executable
+        st = os.stat(predictor_script)
+        os.chmod(predictor_script, st.st_mode | stat.S_IEXEC)
 
         # Call structure predictor
         print("Starting structure predictions")
-        os.system(predictor_script)
+        os.system("bash -i " + predictor_script)
 
 
     # Movie rendering
@@ -120,7 +125,7 @@ def main():
 
             # Compose final frames
 
-            compose_frames(seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir)
+            compose_frames(id, seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir)
 
             # Render output file
 

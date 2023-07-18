@@ -5,6 +5,7 @@ import time
 from scipy.spatial.distance import cdist
 from PIL import Image, ImageFont, ImageDraw
 from progressBar import *
+from utils import get_script_path
 
 
 def distance_map_from_pdb(parser, filename, seqlen):
@@ -93,7 +94,8 @@ def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir
     length = len(seq)
     
     font_size = 12
-    font = ImageFont.truetype("font.ttf", font_size)
+    font_file = os.path.join(get_script_path(), "font.ttf")
+    font = ImageFont.truetype(font_file, font_size)
     
     cell_width = 5
     cell_height = int((height - margin_vert*2) / length)
@@ -167,7 +169,9 @@ def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir
     
 def draw_legend():
     font_size = 12
-    font = ImageFont.truetype("font.ttf", font_size)
+
+    font_file = os.path.join(get_script_path(), "font.ttf")
+    font = ImageFont.truetype(font_file, font_size)
 
     im = Image.new('RGBA', (60, 110), (255, 255, 255, 255))
     draw = ImageDraw.Draw(im)
@@ -207,7 +211,8 @@ def draw_legend():
 
 def draw_amino_acid_labels():
     font_size = 7
-    font = ImageFont.truetype("font.ttf", font_size)
+    font_file = os.path.join(get_script_path(), "font.ttf")
+    font = ImageFont.truetype(font_file, font_size)
     
     im = Image.new('RGBA', (100, 10), (255, 255, 255, 255))
     draw = ImageDraw.Draw(im)

@@ -3,6 +3,7 @@ import sys
 import time
 from PIL import Image, ImageFont, ImageDraw
 from progressBar import *
+from utils import get_script_path
 
 if "pymol" not in  "\t".join(sys.path):
     sys.path.append("/usr/bin/pymol")
@@ -14,8 +15,9 @@ if "pymol" not in  "\t".join(sys.path):
 else: # This IF avoids re-appending to PATH in case you execute this snippet multiple times in the same session
     import pymol
 
-pymol.cmd.feedback("disable","all","actions")
-pymol.cmd.feedback("disable","all","results")
+pymol.cmd.feedback("disable", "all", "actions")
+pymol.cmd.feedback("disable", "all", "results")
+
 
 def write_png(id, pdb_file, png_file, width=720, height=720):
     if os.path.isfile(png_file):
@@ -48,7 +50,8 @@ def write_png(id, pdb_file, png_file, width=720, height=720):
 
     img = Image.open(png_file)
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("font.ttf", 16)
+    font_file = os.path.join(get_script_path(), "font.ttf")
+    font = ImageFont.truetype(font_file, 16)
     draw.text((1, 1), suffix, (0,0,0), font=font)
     img.save(png_file)
     
