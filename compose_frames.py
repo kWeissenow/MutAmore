@@ -4,7 +4,7 @@ from PIL import Image
 from progressBar import *
 
 
-def compose_frames(seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir):
+def compose_frames(id, seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir):
     start_time = time.time()
     total = len(seq) * 19
     printProgressBar(0, total, prefix='Composing final frames:', suffix='Complete', length=50)
