@@ -19,7 +19,7 @@ pymol.cmd.feedback("disable", "all", "actions")
 pymol.cmd.feedback("disable", "all", "results")
 
 
-def write_png(id, pdb_file, png_file, width=720, height=720):
+def write_png(id, pdb_file, png_file, width=720, height=720, scale_factor=1.0):
     if os.path.isfile(png_file):
         return
     pdb_name = os.path.basename(pdb_file).split('.')[0]
@@ -51,12 +51,12 @@ def write_png(id, pdb_file, png_file, width=720, height=720):
     img = Image.open(png_file)
     draw = ImageDraw.Draw(img)
     font_file = os.path.join(get_script_path(), "font.ttf")
-    font = ImageFont.truetype(font_file, 16)
+    font = ImageFont.truetype(font_file, int(16*scale_factor))
     draw.text((1, 1), suffix, (0,0,0), font=font)
     img.save(png_file)
     
     
-def render_3d_frames(id, seq, pdb_dir, png_dir, width, height):
+def render_3d_frames(id, seq, pdb_dir, png_dir, width, height, scale_factor):
     start_time = time.time()
 
     wt_file = os.path.join(pdb_dir, "{}.pdb".format(id))
@@ -74,7 +74,7 @@ def render_3d_frames(id, seq, pdb_dir, png_dir, width, height):
             
             pdb_file = os.path.join(pdb_dir, "{}_{}{}{}.pdb".format(id, seq[i], i+1, aa))
             png_file = os.path.join(png_dir, "{}_{}{}{}.png".format(id, seq[i], i+1, aa))
-            write_png(id, pdb_file, png_file, width=width, height=height)
+            write_png(id, pdb_file, png_file, width=width, height=height, scale_factor=scale_factor)
             
             counter += 1
             printProgressBar(counter, total, prefix = 'Rendering 3D structures:', suffix = 'Complete', length = 50)

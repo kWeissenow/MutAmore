@@ -28,9 +28,12 @@ def main():
     movie_height = args.height
     tmp_dir = args.temp_dir
     prediction_dir = args.prediction_dir
-    matrix_frame_width = 250
-    matrix_margin_horizontal = 25
-    matrix_margin_vertical = 20
+    
+    scale_factor = movie_height / 360
+
+    matrix_frame_width = int(250 * scale_factor)
+    matrix_margin_horizontal = int(25 * scale_factor)
+    matrix_margin_vertical = int(20 * scale_factor)
     
     if args.only_predict and args.only_render:
         print("Please only set either --only-predict or --only-render")
@@ -120,8 +123,8 @@ def main():
 
             # Render 3D frames and mutation matrices
 
-            render_3d_frames(id, seq, prediction_dir, png_dir, movie_width - matrix_frame_width, movie_height)
-            render_mutation_matrices(id, seq, movie_height, prediction_dir, mut_matrices_dir, width=matrix_frame_width, margin_horiz=matrix_margin_horizontal, margin_vert=matrix_margin_vertical)
+            render_3d_frames(id, seq, prediction_dir, png_dir, movie_width - matrix_frame_width, movie_height, scale_factor)
+            render_mutation_matrices(id, seq, movie_height, prediction_dir, mut_matrices_dir, width=matrix_frame_width, margin_horiz=matrix_margin_horizontal, margin_vert=matrix_margin_vertical, scale_factor=scale_factor)
 
             # Compose final frames
 

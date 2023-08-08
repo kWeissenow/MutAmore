@@ -85,7 +85,7 @@ def gradient_color(minval, maxval, val, color_palette=((0,0,0), (255,0,0), (255,
     return int(r1 + f*(r2-r1)), int(g1 + f*(g2-g1)), int(b1 + f*(b2-b1))
     
     
-def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width, margin_horiz, margin_vert, ticks=10):
+def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width, margin_horiz, margin_vert, scale_factor, ticks=10):
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
 
@@ -93,11 +93,11 @@ def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir
 
     length = len(seq)
     
-    font_size = 12
+    font_size = int(12 * scale_factor)
     font_file = os.path.join(get_script_path(), "font.ttf")
     font = ImageFont.truetype(font_file, font_size)
     
-    cell_width = 5
+    cell_width = int(5 * scale_factor)
     cell_height = int((height - margin_vert*2) / length)
     
     # calculate offset to center the mutation matrix vertically
@@ -150,13 +150,15 @@ def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir
             draw.rectangle((x0,y0,x1,y1), outline=(0,0,0))
             
             # amino acid labels
-            im.paste(aa_labels, (margin_horiz, offset_y - 11))
+            im.paste(aa_labels, (margin_horiz, offset_y - int(11*scale_factor)))
     
             # left boundary line
             draw.line([(0,0), (0,height)], fill=(100,100,100))
     
             # draw legend
-            im.paste(legend, (width - margin_horiz - 60, int(height / 2) - 30))
+            legend_x_offset = int(60 * scale_factor)
+            legend_y_offset = int(30 * scale_factor)
+            im.paste(legend, (width - margin_horiz - legend_x_offset, int(height / 2) - legend_y_offset))
             
             filename = os.path.join(out_dir, "{}_matrix_{}{}{}.png".format(id, seq[i], i+1, aa))
             im.save(filename)
@@ -167,17 +169,20 @@ def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir
     print("Elapsed time: {}".format(end_time - start_time))
     
     
-def draw_legend():
-    font_size = 12
+def draw_legend(scale_factor):
+    font_size = int(12 * scale_factor)
 
     font_file = os.path.join(get_script_path(), "font.ttf")
     font = ImageFont.truetype(font_file, font_size)
 
-    im = Image.new('RGBA', (60, 110), (255, 255, 255, 255))
+    size_x = int(60 * scale_factor)
+    size_y = int(110 * scale_factor)
+    im = Image.new('RGBA', (size_x, size_y), (255, 255, 255, 255))
     draw = ImageDraw.Draw(im)
-    legend_width = 10
-    legend_height = 100
-    legend_y_offset = 5
+    
+    legend_width = int(10 * scale_factor)
+    legend_height = int(100 * scale_factor)
+    legend_y_offset = int(5 * scale_factor)
     for i in range(legend_height):
         x0 = 1
         y0 = 1 + i + legend_y_offset
@@ -200,34 +205,42 @@ def draw_legend():
     draw.text((x0, y0+legend_height), "-0%", (0,0,0), font=font)
     
     # draw axis annotation
-    im_annotation = Image.new('RGBA', (100, 15), (255, 255, 255, 255))
+    size_x = int(100 * scale_factor)
+    size_y = int(15 * scale_factor)
+    im_annotation = Image.new('RGBA', (size_x, size_y), (255, 255, 255, 255))
     draw_annotation = ImageDraw.Draw(im_annotation)
     draw_annotation.text((0,0), "structure similarity", (0,0,0), font=font)
     im_annotation = im_annotation.transpose(method=Image.Transpose.ROTATE_90)
-    im.paste(im_annotation, (45, 5))
+    pos_x = int(45 * scale_factor)
+    pos_y = int(5 * scale_factor)
+    im.paste(im_annotation, (pos_x, pos_y))
     
     return im
     
 
-def draw_amino_acid_labels():
-    font_size = 7
+def draw_amino_acid_labels(scale_factor):
+    font_size = int(7 * scale_factor)
     font_file = os.path.join(get_script_path(), "font.ttf")
     font = ImageFont.truetype(font_file, font_size)
     
-    im = Image.new('RGBA', (100, 10), (255, 255, 255, 255))
+    size_x = int(100 * scale_factor)
+    size_y = int(10 * scale_factor)
+    im = Image.new('RGBA', (size_x, size_y), (255, 255, 255, 255))
     draw = ImageDraw.Draw(im)
     for i,c in enumerate("ACDEFGHIKLMNPQRSTVWY"):
-        draw.text((i*5,0), c, (0,0,0), font=font)
+        pos = int(i * 5 * scale_factor)
+        draw.text((pos,0), c, (0,0,0), font=font)
     
     return im
     
 
-def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margin_horiz=25, margin_vert=20):
+def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margin_horiz=25, margin_vert=20, scale_factor=1.0):
     # draw legend
-    legend = draw_legend()
+    legend = draw_legend(scale_factor)
     
     # draw amino acid labels
-    aa_labels = draw_amino_acid_labels()
+    aa_labels = draw_amino_acid_labels(scale_factor)
 
     mut_matrix = get_mutation_matrix(id, seq, pdb_dir)
-    render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width=width, margin_horiz=margin_horiz, margin_vert=margin_vert)
+    
+    render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width=width, margin_horiz=margin_horiz, margin_vert=margin_vert, scale_factor=scale_factor)
