@@ -4,6 +4,8 @@
 
 MutAmore visualizes the predicted structural changes of single amino-acid substitutions on a protein sequence as a protein mutation movie (PMM).
 
+Examples rendered in 4K resolution are available on [YouTube](https://www.youtube.com/watch?v=1XgiFXg-Xrs&list=PL0QUUE_zWBuJ6Y5NWtDoY93FUweUUGVuf).
+
 # Running MutAmore on Google Colab
 You can try MutAmore on Google Colab in [this notebook](https://colab.research.google.com/drive/1tOzIw2JLnj_jWOHcGQ-kpbSw790O_5OY?usp=sharing).
 The Colab notebook is sufficient for movie rendering of (shorter) protein sequences. If you want to create movies for a larger set of sequences or particularly large proteins, consider installing MutAmore locally as described below.
