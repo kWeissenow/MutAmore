@@ -92,6 +92,22 @@ By default, MutAmore outputs the finished movies in the directory in which you c
 ```
 
 # Cite
+The pre-print is available on [bioRxiv](https://biorxiv.org/cgi/content/short/2023.09.15.557870v1).
+Cite with
 ```
-On BioRxiv soon!
+@article {Weissenow2023,
+	author = {Weissenow, Konstantin and Rost, Burkhard},
+	title = {Rendering protein mutation movies with MutAmore},
+	elocation-id = {2023.09.15.557870},
+	year = {2023},
+	doi = {10.1101/2023.09.15.557870},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/10.1101/2023.09.15.557870v1},
+	eprint = {https://www.biorxiv.org/content/10.1101/2023.09.15.557870v1.full.pdf},
+	journal = {bioRxiv}
+}
+```
+or
+```
+K. Weissenow and B. Rost, Rendering protein mutation movies with MutAmore, bioRxiv (2023)
 ```
