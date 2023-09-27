@@ -1,6 +1,6 @@
 # MutAmore
 
-[![Protein mutation movie](http://img.youtube.com/vi/1XgiFXg-Xrs/0.jpg)](http://www.youtube.com/watch?v=1XgiFXg-Xrs "Protein mutation movie")
+[![Protein mutation movie](http://img.youtube.com/vi/1XgiFXg-Xrs/0.jpg)](https://www.youtube.com/watch?v=1XgiFXg-Xrs&list=PL0QUUE_zWBuJ6Y5NWtDoY93FUweUUGVuf)
 
 MutAmore visualizes the predicted structural changes of single amino-acid substitutions on a protein sequence as a protein mutation movie (PMM).
 
