@@ -31,9 +31,9 @@ def main():
     
     scale_factor = movie_height / 360
 
-    matrix_frame_width = int(250 * scale_factor)
-    matrix_margin_horizontal = int(25 * scale_factor)
-    matrix_margin_vertical = int(20 * scale_factor)
+    matrix_frame_width = int(200 * scale_factor)
+    matrix_margin_horizontal = int(5 * scale_factor)
+    matrix_margin_vertical = int(10 * scale_factor)
     
     if args.only_predict and args.only_render:
         print("Please only set either --only-predict or --only-render")

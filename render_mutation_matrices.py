@@ -134,7 +134,7 @@ def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir
                     y0 = offset_y + idx * cell_height
                     x1 = x0 + cell_width
                     y1 = y0 + cell_height
-                    color = gradient_color(0.0, 1.0, mut_matrix[m][idx])
+                    color = gradient_color(0.3, 1.0, mut_matrix[m][idx])
                     outline = None
                     if idx == i and m == aa_list.index(aa):
                         outline = (0,0,0)
@@ -201,8 +201,8 @@ def draw_legend(scale_factor):
     # draw axis ticks    
     x0 = legend_width + 1
     y0 = legend_y_offset - font_size/2 - 1
-    draw.text((x0, y0), "-100%", (0,0,0), font=font)
-    draw.text((x0, y0+legend_height), "-0%", (0,0,0), font=font)
+    draw.text((x0, y0), "100%", (0,0,0), font=font)
+    draw.text((x0, y0+legend_height), "30%", (0,0,0), font=font)
     
     # draw axis annotation
     size_x = int(100 * scale_factor)
