@@ -98,7 +98,7 @@ def gradient_color(minval, maxval, val, color_palette=((0,0,0), (255,0,0), (255,
     return int(r1 + f*(r2-r1)), int(g1 + f*(g2-g1)), int(b1 + f*(b2-b1))
     
     
-def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width, margin_horiz, margin_vert, scale_factor):
+def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width, margin_horiz, margin_vert, scale_factor, topN_indices):
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
 
@@ -133,6 +133,10 @@ def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir
     for i in range(len(seq)):
         for aa in aa_list:
             if aa == seq[i]:
+                continue
+            if topN_indices is not None and topN_indices[aa_list.index(aa), i] == False:
+                counter += 1
+                printProgressBar(counter, total, prefix = 'Rendering mutation matrices:', suffix = 'Complete', length = 50)
                 continue
             temp_seq = seq.copy()
             temp_seq[i] = aa    
@@ -251,7 +255,7 @@ def draw_amino_acid_labels(scale_factor):
     return im
     
 
-def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margin_horiz=25, margin_vert=20, scale_factor=1.0, experimental_mutations=None, experimental_dir=None):
+def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margin_horiz=25, margin_vert=20, scale_factor=1.0, experimental_mutations=None, experimental_dir=None, topN=None):
     # draw legend
     legend = draw_legend(scale_factor)
     
@@ -260,4 +264,12 @@ def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margi
 
     mut_matrix = get_mutation_matrix(id, seq, pdb_dir, experimental_mutations, experimental_dir)
     
-    render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width=width, margin_horiz=margin_horiz, margin_vert=margin_vert, scale_factor=scale_factor)
+    # if topN is set, get positions with highest structural difference
+    topN_indices = None
+    if topN is not None:
+        topN_similarity = bottom_k = np.partition(mut_matrix.flatten(), topN)[:topN]
+        threshold = np.sort(topN_similarity)[-1]
+        topN_indices = mut_matrix <= threshold
+    
+    render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width=width, margin_horiz=margin_horiz, margin_vert=margin_vert, scale_factor=scale_factor, topN_indices=topN_indices)
+    return topN_indices

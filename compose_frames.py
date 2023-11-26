@@ -4,19 +4,26 @@ from PIL import Image
 from progressBar import *
 
 
-def compose_frames(id, seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir):
+def compose_frames(id, seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir, topN_indices):
     start_time = time.time()
     total = len(seq) * 19
     printProgressBar(0, total, prefix='Composing final frames:', suffix='Complete', length=50)
+    outputIndex = 0
     counter = 0
+    aa_list = list("ACDEFGHIKLMNPQRSTVWY")
     for i in range(len(seq)):
         for aa in list("ACDEFGHIKLMNPQRSTVWY"):
             if aa == seq[i]:
                 continue
+            if topN_indices is not None and topN_indices[aa_list.index(aa), i] == False:
+                counter += 1
+                printProgressBar(counter, total, prefix='Composing final frames:', suffix='Complete', length=50)
+                continue
             temp_seq = seq.copy()
             temp_seq[i] = aa
 
-            composite_file = os.path.join(composite_dir, "{}.png".format(counter))
+            composite_file = os.path.join(composite_dir, "{}.png".format(outputIndex))
+            outputIndex += 1
 
             png_file = os.path.join(png_dir, "{}_{}{}{}.png".format(id, seq[i], i + 1, aa))
             img_3d = Image.open(png_file)

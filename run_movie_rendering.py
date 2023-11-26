@@ -20,6 +20,7 @@ def main():
     parser.add_argument('--experimental_dir', type=str, help="Directory for experimental structures (optional)")
     parser.add_argument('-s', '--predictor_script', type=str, dest="template_script", help="Structure prediction script")
     parser.add_argument('-z', '--zoom_factor', type=float, help="Specific zoom level to be used for 3D rendering (optional)")
+    parser.add_argument('--top', type=int, help="Only show top-N mutants with structural difference")
     parser.add_argument('--only-predict', dest="only_predict", action="store_true", help="Only run structure prediction")
     parser.add_argument('--only-render', dest="only_render", action="store_true", help="Only run movie rendering")
     args = parser.parse_args()
@@ -48,6 +49,16 @@ def main():
     zoom_factor = None
     if args.zoom_factor:
         zoom_factor = args.zoom_factor
+        
+    topN = None
+    framerate = 19
+    if args.top:
+        topN = args.top
+        framerate = topN / 5
+        if framerate < 2:
+            framerate = 2
+        if framerate > 19:
+            framerate = 19
 
     if doPredict and args.template_script is None:
         print("Please select a structure prediction script from the directory 'predictor_scripts/', e.g. using")
@@ -143,19 +154,19 @@ def main():
 
             # Render 3D frames and mutation matrices
 
-            render_3d_frames(id, seq, prediction_dir, png_dir, movie_width - matrix_frame_width, movie_height, scale_factor, zoom_factor, experimental_mutations, args.experimental_dir)
-            render_mutation_matrices(id, seq, movie_height, prediction_dir, mut_matrices_dir, width=matrix_frame_width, margin_horiz=matrix_margin_horizontal, margin_vert=matrix_margin_vertical, scale_factor=scale_factor, experimental_mutations=experimental_mutations, experimental_dir=args.experimental_dir)
+            topN_indices = render_mutation_matrices(id, seq, movie_height, prediction_dir, mut_matrices_dir, width=matrix_frame_width, margin_horiz=matrix_margin_horizontal, margin_vert=matrix_margin_vertical, scale_factor=scale_factor, experimental_mutations=experimental_mutations, experimental_dir=args.experimental_dir, topN=topN)
+            render_3d_frames(id, seq, prediction_dir, png_dir, movie_width - matrix_frame_width, movie_height, scale_factor, zoom_factor, experimental_mutations, args.experimental_dir, topN_indices)
 
             # Compose final frames
 
-            compose_frames(id, seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir)
+            compose_frames(id, seq, movie_width, movie_height, matrix_frame_width, mut_matrices_dir, png_dir, composite_dir, topN_indices)
 
             # Render output file
 
             print("Rendering movie for {}".format(id))
             start_time = time.time()
             out_file = os.path.join(output_dir, "{}.mp4".format(id))
-            os.system("ffmpeg -y -f image2 -framerate 19 -i {}/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {} > /dev/null 2>&1".format(composite_dir, out_file))
+            os.system("ffmpeg -y -f image2 -framerate {} -i {}/%d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {} > /dev/null 2>&1".format(framerate, composite_dir, out_file))
             end_time = time.time()
             print("Elapsed time: {}".format(end_time - start_time))
 

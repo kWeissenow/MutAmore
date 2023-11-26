@@ -61,7 +61,7 @@ def write_png(id, pdb_file, png_file, width=720, height=720, scale_factor=1.0, z
     img.save(png_file)
     
     
-def render_3d_frames(id, seq, pdb_dir, png_dir, width, height, scale_factor, zoom_factor=None, experimental_mutations=None, experimental_dir=None):
+def render_3d_frames(id, seq, pdb_dir, png_dir, width, height, scale_factor, zoom_factor=None, experimental_mutations=None, experimental_dir=None, topN_indices=None):
     start_time = time.time()
 
     wt_file = os.path.join(pdb_dir, "{}.pdb".format(id))
@@ -70,9 +70,14 @@ def render_3d_frames(id, seq, pdb_dir, png_dir, width, height, scale_factor, zoo
     total = len(seq) * 19
     printProgressBar(0, total, prefix = 'Rendering 3D structures:', suffix = 'Complete', length = 50)
     counter = 0
+    aa_list = list("ACDEFGHIKLMNPQRSTVWY")
     for i in range(len(seq)):
         for aa in list("ACDEFGHIKLMNPQRSTVWY"):
             if aa == seq[i]:
+                continue
+            if topN_indices is not None and topN_indices[aa_list.index(aa), i] == False:
+                counter += 1
+                printProgressBar(counter, total, prefix = 'Rendering 3D structures:', suffix = 'Complete', length = 50)
                 continue
             temp_seq = seq.copy()
             temp_seq[i] = aa
