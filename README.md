@@ -73,6 +73,25 @@ MutAmore by default renders movies in the resolution 1280x720. You can set a dif
 --width 3840 --height 2160
 ```
 
+### Rendering a subset of most impactful mutations
+Instead of creating a movie with all mutants, you can use the parameter `top` to specify the number of most impactful mutations to be included in the movie, which also reduces rendering time significantly. To e.g. only show the top-50 mutants, use the following parameter:
+```
+--top 50
+```
+
+### Using experimental structures
+In case you have experimental structures of mutants, you can use them in place of structure predictions. For this, please put the PDB files of mutants in a separate directory with the file name indicating the mutation (e.g. `L32K.pdb`) and tell MutAmore the directory with the following parameter:
+```
+--experimental_dir <STRUCTURE_DIRECTORY>
+```
+In this mode, predicted structures will be shown with slightly less opacity to make them visually distinguishable from experimental structures.
+
+### Manually adjusting the zoom level
+MutAmore uses PyMOL to automatically find a proper zoom level. In case you want to override this setting, you can use the parameter `-z` to specify a zoom offset. Positive numbers cause the camera to zoom out while negative values will zoom further in:
+```
+-z 10
+```
+
 ### Temporary directory
 MutAmore creates a temporary directory to store intermediate files, which is deleted after finishing. By default, it will create the directory `./tmp/` where you call MutAmore. To specify a different directory, use the parameter `-t`:
 ```
