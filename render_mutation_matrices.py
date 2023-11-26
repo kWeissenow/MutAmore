@@ -12,8 +12,12 @@ def distance_map_from_pdb(parser, filename, seqlen):
     structure = parser.get_structure(filename, filename)
 
     c_alpha = np.zeros((seqlen, 3))
-    for i,residue in enumerate(structure[0]["A"]):
-        c_alpha[i] = residue["CA"].get_coord()
+    for chain in structure[0]:
+        if len(chain) != seqlen:
+            return None
+        for i,residue in enumerate(chain):
+            c_alpha[i] = residue["CA"].get_coord()
+        break
 
     return cdist(c_alpha, c_alpha)
 
@@ -37,7 +41,7 @@ def distance_diff(d1, d2):
     return np.average(lddt_score)
 
 
-def get_mutation_matrix(id, seq, pdb_dir):
+def get_mutation_matrix(id, seq, pdb_dir, experimental_mutations, experimental_dir):
     parser = PDBParser(QUIET=True)
     wt_file = os.path.join(pdb_dir, "{}.pdb".format(id))
     ref_distance_map = distance_map_from_pdb(parser, wt_file, len(seq))
@@ -54,9 +58,18 @@ def get_mutation_matrix(id, seq, pdb_dir):
                 continue
             temp_seq = seq.copy()
             temp_seq[i] = aa    
+            mut_name = seq[i] + str(i+1) + aa
 
-            filename = os.path.join(pdb_dir, "{}_{}{}{}.pdb".format(id, seq[i], i+1, aa))
+            if experimental_mutations is not None and mut_name in experimental_mutations:
+                filename = os.path.join(experimental_dir, mut_name + ".pdb")
+            else:
+                filename = os.path.join(pdb_dir, "{}_{}{}{}.pdb".format(id, seq[i], i+1, aa))
             dist_map = distance_map_from_pdb(parser, filename, len(seq))
+            
+            if dist_map is None:
+                print("WARNING: ignoring experimental structure {} since it does not have the same length as the wild-type structure".format(filename))
+                mut_matrix[aa_list.index(aa), i] = 0.0
+                continue
 
             delta = distance_diff(ref_distance_map, dist_map)
             mut_matrix[aa_list.index(aa), i] = delta
@@ -238,13 +251,13 @@ def draw_amino_acid_labels(scale_factor):
     return im
     
 
-def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margin_horiz=25, margin_vert=20, scale_factor=1.0):
+def render_mutation_matrices(id, seq, height, pdb_dir, out_dir, width=250, margin_horiz=25, margin_vert=20, scale_factor=1.0, experimental_mutations=None, experimental_dir=None):
     # draw legend
     legend = draw_legend(scale_factor)
     
     # draw amino acid labels
     aa_labels = draw_amino_acid_labels(scale_factor)
 
-    mut_matrix = get_mutation_matrix(id, seq, pdb_dir)
+    mut_matrix = get_mutation_matrix(id, seq, pdb_dir, experimental_mutations, experimental_dir)
     
     render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width=width, margin_horiz=margin_horiz, margin_vert=margin_vert, scale_factor=scale_factor)

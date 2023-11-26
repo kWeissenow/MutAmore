@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 from progressBar import *
 from utils import get_script_path
 
@@ -19,7 +19,7 @@ pymol.cmd.feedback("disable", "all", "actions")
 pymol.cmd.feedback("disable", "all", "results")
 
 
-def write_png(id, pdb_file, png_file, width=720, height=720, scale_factor=1.0):
+def write_png(id, pdb_file, png_file, width=720, height=720, scale_factor=1.0, zoom_factor=None, transparency=False):
     if os.path.isfile(png_file):
         return
     pdb_name = os.path.basename(pdb_file).split('.')[0]
@@ -39,6 +39,8 @@ def write_png(id, pdb_file, png_file, width=720, height=720, scale_factor=1.0):
     pymol.cmd.disable("all")
     pymol.cmd.enable(pdb_name)
     pymol.cmd.hide('all')
+    if zoom_factor is not None:
+        pymol.cmd.zoom("center", zoom_factor)
     pymol.cmd.show('cartoon')
     pymol.cmd.set('ray_opaque_background', 1)
     pymol.cmd.set('depth_cue', 0)
@@ -49,6 +51,9 @@ def write_png(id, pdb_file, png_file, width=720, height=720, scale_factor=1.0):
     pymol.cmd.delete(pdb_name)
 
     img = Image.open(png_file)
+    if transparency:
+        contrast_enhancer = ImageEnhance.Contrast(img)
+        img = contrast_enhancer.enhance(0.6)
     draw = ImageDraw.Draw(img)
     font_file = os.path.join(get_script_path(), "font.ttf")
     font = ImageFont.truetype(font_file, int(16*scale_factor))
@@ -56,7 +61,7 @@ def write_png(id, pdb_file, png_file, width=720, height=720, scale_factor=1.0):
     img.save(png_file)
     
     
-def render_3d_frames(id, seq, pdb_dir, png_dir, width, height, scale_factor):
+def render_3d_frames(id, seq, pdb_dir, png_dir, width, height, scale_factor, zoom_factor=None, experimental_mutations=None, experimental_dir=None):
     start_time = time.time()
 
     wt_file = os.path.join(pdb_dir, "{}.pdb".format(id))
@@ -72,9 +77,17 @@ def render_3d_frames(id, seq, pdb_dir, png_dir, width, height, scale_factor):
             temp_seq = seq.copy()
             temp_seq[i] = aa
             
-            pdb_file = os.path.join(pdb_dir, "{}_{}{}{}.pdb".format(id, seq[i], i+1, aa))
+            mut_name = seq[i] + str(i+1) + aa
+            transparency = False
+            if experimental_mutations is not None and not mut_name in experimental_mutations:
+                transparency = True
+            
+            if experimental_mutations is not None and mut_name in experimental_mutations:
+                pdb_file = os.path.join(experimental_dir, mut_name + ".pdb")
+            else:
+                pdb_file = os.path.join(pdb_dir, "{}_{}{}{}.pdb".format(id, seq[i], i+1, aa))
             png_file = os.path.join(png_dir, "{}_{}{}{}.png".format(id, seq[i], i+1, aa))
-            write_png(id, pdb_file, png_file, width=width, height=height, scale_factor=scale_factor)
+            write_png(id, pdb_file, png_file, width=width, height=height, scale_factor=scale_factor, zoom_factor=zoom_factor, transparency=transparency)
             
             counter += 1
             printProgressBar(counter, total, prefix = 'Rendering 3D structures:', suffix = 'Complete', length = 50)

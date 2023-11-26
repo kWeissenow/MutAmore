@@ -17,7 +17,9 @@ def main():
     parser.add_argument('--height', type=int, help="Movie vertical resolution (default: 720)", default=720)
     parser.add_argument('-t', '--temp_dir', type=str, help="Directory for temporary files (default: ./tmp)", default="./tmp")
     parser.add_argument('-p', '--prediction_dir', type=str, help="Directory for predicted structures (default: ./tmp/predictions)", default="./tmp/predictions")
+    parser.add_argument('--experimental_dir', type=str, help="Directory for experimental structures (optional)")
     parser.add_argument('-s', '--predictor_script', type=str, dest="template_script", help="Structure prediction script")
+    parser.add_argument('-z', '--zoom_factor', type=float, help="Specific zoom level to be used for 3D rendering (optional)")
     parser.add_argument('--only-predict', dest="only_predict", action="store_true", help="Only run structure prediction")
     parser.add_argument('--only-render', dest="only_render", action="store_true", help="Only run movie rendering")
     args = parser.parse_args()
@@ -43,6 +45,9 @@ def main():
         doRender = False
     elif args.only_render:
         doPredict = False
+    zoom_factor = None
+    if args.zoom_factor:
+        zoom_factor = args.zoom_factor
 
     if doPredict and args.template_script is None:
         print("Please select a structure prediction script from the directory 'predictor_scripts/', e.g. using")
@@ -55,6 +60,16 @@ def main():
     if not os.path.isdir(tmp_dir):
         os.makedirs(tmp_dir)
 
+    # parse optional experimental structures
+    experimental_mutations = None
+    if args.experimental_dir:
+        print("Parsing experimental structures..")
+        for file_name in os.listdir(args.experimental_dir):
+            if file_name.endswith(".pdb"):
+                mut_name = file_name[:-4]
+                if experimental_mutations is None:
+                    experimental_mutations = []
+                experimental_mutations.append(mut_name)
 
     # Structure prediction
     
@@ -76,6 +91,11 @@ def main():
                             continue
                         temp_seq = seq.copy()
                         temp_seq[i] = aa
+                        
+                        # skip experimental structures
+                        mut_name = seq[i] + str(i+1) + aa
+                        if experimental_mutations is not None and mut_name in experimental_mutations:
+                            continue
 
                         f.write(">{}_{}{}{}\n{}\n".format(id, seq[i], i+1, aa, "".join(temp_seq)))
 
@@ -123,8 +143,8 @@ def main():
 
             # Render 3D frames and mutation matrices
 
-            render_3d_frames(id, seq, prediction_dir, png_dir, movie_width - matrix_frame_width, movie_height, scale_factor)
-            render_mutation_matrices(id, seq, movie_height, prediction_dir, mut_matrices_dir, width=matrix_frame_width, margin_horiz=matrix_margin_horizontal, margin_vert=matrix_margin_vertical, scale_factor=scale_factor)
+            render_3d_frames(id, seq, prediction_dir, png_dir, movie_width - matrix_frame_width, movie_height, scale_factor, zoom_factor, experimental_mutations, args.experimental_dir)
+            render_mutation_matrices(id, seq, movie_height, prediction_dir, mut_matrices_dir, width=matrix_frame_width, margin_horiz=matrix_margin_horizontal, margin_vert=matrix_margin_vertical, scale_factor=scale_factor, experimental_mutations=experimental_mutations, experimental_dir=args.experimental_dir)
 
             # Compose final frames
 
