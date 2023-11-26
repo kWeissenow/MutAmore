@@ -85,13 +85,17 @@ def gradient_color(minval, maxval, val, color_palette=((0,0,0), (255,0,0), (255,
     return int(r1 + f*(r2-r1)), int(g1 + f*(g2-g1)), int(b1 + f*(b2-b1))
     
     
-def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width, margin_horiz, margin_vert, scale_factor, ticks=10):
+def render_matrix_frames(id, seq, mut_matrix, legend, aa_labels, height, out_dir, width, margin_horiz, margin_vert, scale_factor):
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
 
     start_time = time.time()
 
     length = len(seq)
+
+    ticks = 10
+    if length > 400:
+        ticks = 50
     
     font_size = int(12 * scale_factor)
     font_file = os.path.join(get_script_path(), "font.ttf")
