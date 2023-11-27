@@ -110,6 +110,10 @@ By default, MutAmore outputs the finished movies in the directory in which you c
 -o <MOVIE_OUTPUT_DIRECTORY>
 ```
 
+# Color-coding of predicted confidence
+
+MutAmore uses predicted confidence scores as obtained from the b-factor column of PDB files for color-coding the 3D visualizations. This way of representing confidence has been established as a standard by AlphaFold2 and as of today been used by all recent 3D structure prediction methods. We expect future methods to follow in line.
+
 # Cite
 The pre-print is available on [bioRxiv](https://biorxiv.org/cgi/content/short/2023.09.15.557870v1).
 Cite with
